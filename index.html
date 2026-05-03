@@ -1,0 +1,67 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>AI Voice Generator</h1>
+            <p>Enter text to generate voiceovers in multiple languages and genders.</p>
+        </header>
+        <main>
+            <div class="input-container">
+                <textarea id="text-input" placeholder="Enter text to speak..."></textarea>
+                
+                <fieldset class="gender-selector">
+                    <legend>Voice Gender</legend>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="gender-male" name="gender" value="male" checked>
+                            <label for="gender-male">Male</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="gender-female" name="gender" value="female">
+                            <label for="gender-female">Female</label>
+                        </div>
+                    </div>
+                </fieldset>
+                
+                <div class="language-selection">
+                    <div class="input-lang-selector">
+                        <label for="input-language">Input Language:</label>
+                        <select id="input-language">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+
+                    <fieldset class="output-lang-selector">
+                        <legend>Output Languages:</legend>
+                        <div id="output-languages-container">
+                            <!-- Checkboxes will be populated by JS -->
+                        </div>
+                    </fieldset>
+                </div>
+
+                <button id="generate-btn">Generate Voices</button>
+            </div>
+            
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p>Generating voices... this may take a moment.</p>
+            </div>
+
+            <div id="results-container"></div>
+        </main>
+    </div>
+    <script src="config.js"></script>
+    <!-- config.local.js is gitignored; create from config.local.example.js for local dev -->
+    <script src="config.local.js" onerror="void 0"></script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

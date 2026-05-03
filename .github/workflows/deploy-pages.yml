@@ -1,0 +1,86 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare build directory
+        run: |
+          mkdir -p _site
+
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='_site' \
+            --exclude='.gitignore' \
+            --exclude='.DS_Store' \
+            --exclude='/config.js' \
+            --exclude='/config.local.js' \
+            --exclude='/config.local.example.js' \
+            . _site/
+
+          _GH_RAW="${{ secrets.GH_MODELS_TOKEN }}"
+          _PK_RAW="${{ secrets.POLLINATIONS_API_KEY }}"
+          TEXT_PROVIDER="${{ vars.TEXT_PROVIDER }}"
+
+          # Default to github if token present, otherwise pollinations
+          if [ -z "$TEXT_PROVIDER" ]; then
+            if [ -n "$_GH_RAW" ]; then
+              TEXT_PROVIDER="github"
+            else
+              TEXT_PROVIDER="pollinations"
+            fi
+          fi
+
+          # Base64-encode sensitive values so they aren't plain-text in the deployed file
+          _GK=$(printf '%s' "$_GH_RAW" | base64 | tr -d '\n')
+          _PK=$(printf '%s' "$_PK_RAW" | base64 | tr -d '\n')
+
+          cat > _site/config.js <<EOF
+          (function(){
+            var _c = window;
+            var _n = '_avgc';
+            _c[_n] = {
+              _tp: '${TEXT_PROVIDER}',
+              _pb: 'https://gen.pollinations.ai',
+              _ptm: 'openai',
+              _pk: '${_PK}',
+              _gb: 'https://models.github.ai',
+              _gk: '${_GK}',
+              _gm: 'openai/gpt-4.1-mini',
+              _gv: '2026-03-10'
+            };
+          })();
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
