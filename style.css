@@ -59,15 +59,14 @@ textarea {
     box-sizing: border-box;
 }
 
-.gender-selector {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
+.voice-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.gender-selector .radio-group {
-    display: flex;
-    gap: 20px;
+.voice-selector select {
+    width: 100%;
 }
 
 .language-selection {

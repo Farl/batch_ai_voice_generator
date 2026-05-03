@@ -18,19 +18,23 @@
             <div class="input-container">
                 <textarea id="text-input" placeholder="Enter text to speak..."></textarea>
                 
-                <fieldset class="gender-selector">
-                    <legend>Voice Gender</legend>
-                    <div class="radio-group">
-                        <div class="radio-item">
-                            <input type="radio" id="gender-male" name="gender" value="male" checked>
-                            <label for="gender-male">Male</label>
-                        </div>
-                        <div class="radio-item">
-                            <input type="radio" id="gender-female" name="gender" value="female">
-                            <label for="gender-female">Female</label>
-                        </div>
-                    </div>
-                </fieldset>
+                <div class="voice-selector">
+                    <label for="voice-select">Voice Model:</label>
+                    <select id="voice-select">
+                        <optgroup label="Female">
+                            <option value="nova" selected>nova — warm &amp; natural</option>
+                            <option value="shimmer">shimmer — soft &amp; clear</option>
+                        </optgroup>
+                        <optgroup label="Male">
+                            <option value="onyx">onyx — deep &amp; authoritative</option>
+                            <option value="echo">echo — smooth &amp; balanced</option>
+                            <option value="fable">fable — expressive &amp; storytelling</option>
+                        </optgroup>
+                        <optgroup label="Neutral">
+                            <option value="alloy">alloy — versatile &amp; neutral</option>
+                        </optgroup>
+                    </select>
+                </div>
                 
                 <div class="language-selection">
                     <div class="input-lang-selector">

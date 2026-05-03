@@ -7,16 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
     const loadingDiv = document.getElementById('loading');
     const resultsContainer = document.getElementById('results-container');
+    const voiceSelect = document.getElementById('voice-select');
 
     const languages = {
         'en': 'English', 'es': 'Spanish', 'fr': 'French',
         'de': 'German', 'it': 'Italian', 'pt': 'Portuguese',
         'hi': 'Hindi', 'ja': 'Japanese', 'zh': 'Chinese', 'ko': 'Korean'
     };
-
-    // Gender → Pollinations TTS voice mapping
-    // Male: onyx (deep), Female: nova (warm female)
-    const VOICE_MAP = { male: 'onyx', female: 'nova' };
 
     function populateLanguages() {
         Object.entries(languages).forEach(([code, name]) => {
@@ -44,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function handleGeneration() {
         const text = textInput.value.trim();
-        const selectedGender = document.querySelector('input[name="gender"]:checked').value;
         const inputLang = inputLanguageSelect.value;
         const selectedOutputLangs = Array.from(
             outputLanguagesContainer.querySelectorAll('input:checked')
@@ -90,7 +86,7 @@ Target Languages: ${langsToTranslate.map(l => `${languages[l]} (${l})`).join(', 
                 Object.assign(textsToSynthesize, translations);
             }
 
-            const voice = VOICE_MAP[selectedGender] || 'nova';
+            const voice = voiceSelect.value || 'nova';
             for (const lang of allLangsToOutput) {
                 const textToSpeak = textsToSynthesize[lang];
                 if (textToSpeak) {
