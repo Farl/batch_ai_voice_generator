@@ -1,0 +1,8 @@
+{
+  "name": "batch-ai-voice-generator",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

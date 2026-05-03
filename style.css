@@ -86,6 +86,40 @@ textarea {
     flex-wrap: wrap;
 }
 
+.cost-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.summary-card {
+    background: linear-gradient(180deg, #f7f9ff 0%, #eef3ff 100%);
+    border: 1px solid #dbe5ff;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.summary-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #5a78d1;
+}
+
+.summary-card strong {
+    font-size: 1.1rem;
+    color: #22304d;
+}
+
+.summary-card small {
+    color: #5e6b84;
+    line-height: 1.35;
+}
+
 .input-lang-selector, .output-lang-selector {
     flex: 1;
 }
@@ -215,6 +249,15 @@ legend {
     font-style: italic;
 }
 
+.result-item .result-meta {
+    margin-top: -6px;
+    margin-bottom: 14px;
+    color: #5a78d1;
+    font-size: 0.92rem;
+    font-style: normal;
+    font-weight: 500;
+}
+
 audio {
     width: 100%;
 }
@@ -229,4 +272,22 @@ audio {
     border: 1px solid #e74c3c;
     border-radius: 8px;
     padding: 12px 16px;
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 12px;
+    }
+
+    main {
+        padding: 20px;
+    }
+
+    header {
+        padding: 18px 20px;
+    }
+
+    header h1 {
+        font-size: 2rem;
+    }
 }
