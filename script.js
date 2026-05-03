@@ -1,4 +1,4 @@
-import { generateText, buildSpeechUrl } from './api.js';
+import { generateText, buildSpeechUrl, fetchAudioModels, getVoicesForModel } from './api.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const textInput = document.getElementById('text-input');
@@ -8,12 +8,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingDiv = document.getElementById('loading');
     const resultsContainer = document.getElementById('results-container');
     const voiceSelect = document.getElementById('voice-select');
+    const audioModelSelect = document.getElementById('audio-model-select');
+    const voiceSelectorWrapper = document.getElementById('voice-selector-wrapper');
 
     const languages = {
         'en': 'English', 'es': 'Spanish', 'fr': 'French',
         'de': 'German', 'it': 'Italian', 'pt': 'Portuguese',
         'hi': 'Hindi', 'ja': 'Japanese', 'zh': 'Chinese', 'ko': 'Korean'
     };
+
+    // ── Model + voice loading ──────────────────────────────────────────────────
+
+    function populateVoices(modelId) {
+        const voices = getVoicesForModel(modelId);
+        voiceSelect.innerHTML = '';
+        if (voices.length === 0) {
+            voiceSelectorWrapper.classList.add('hidden');
+        } else {
+            voices.forEach(({ id, label }, i) => {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = label;
+                if (i === 0) opt.selected = true;
+                voiceSelect.appendChild(opt);
+            });
+            voiceSelectorWrapper.classList.remove('hidden');
+        }
+    }
+
+    async function loadAudioModels() {
+        try {
+            const models = await fetchAudioModels();
+            audioModelSelect.innerHTML = '';
+            if (models.length === 0) {
+                audioModelSelect.innerHTML = '<option value="">No models available</option>';
+                return;
+            }
+            models.forEach((m, i) => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.type === 'music'
+                    ? `${m.id}  [music generation]`
+                    : m.id;
+                if (i === 0) opt.selected = true;
+                audioModelSelect.appendChild(opt);
+            });
+            audioModelSelect.disabled = false;
+            populateVoices(audioModelSelect.value);
+        } catch (err) {
+            console.error('[models] Failed to load audio models:', err);
+            audioModelSelect.innerHTML = '<option value="qwen-tts">qwen-tts (fallback)</option>';
+            audioModelSelect.disabled = false;
+            populateVoices('qwen-tts');
+        }
+    }
+
+    audioModelSelect.addEventListener('change', () => {
+        populateVoices(audioModelSelect.value);
+    });
 
     function populateLanguages() {
         Object.entries(languages).forEach(([code, name]) => {
@@ -86,11 +138,12 @@ Target Languages: ${langsToTranslate.map(l => `${languages[l]} (${l})`).join(', 
                 Object.assign(textsToSynthesize, translations);
             }
 
-            const voice = voiceSelect.value || 'nova';
+            const modelId = audioModelSelect.value;
+            const voice = voiceSelect.value || '';
             for (const lang of allLangsToOutput) {
                 const textToSpeak = textsToSynthesize[lang];
                 if (textToSpeak) {
-                    displayAudioResult(lang, textToSpeak, voice);
+                    displayAudioResult(lang, textToSpeak, voice, modelId);
                 }
             }
 
@@ -104,8 +157,8 @@ Target Languages: ${langsToTranslate.map(l => `${languages[l]} (${l})`).join(', 
         }
     }
 
-    function displayAudioResult(lang, text, voice) {
-        const audioUrl = buildSpeechUrl(text, voice);
+    function displayAudioResult(lang, text, voice, modelId) {
+        const audioUrl = buildSpeechUrl(text, voice, modelId);
         const resultItem = document.createElement('div');
         resultItem.className = 'result-item';
         resultItem.innerHTML = `
@@ -118,4 +171,5 @@ Target Languages: ${langsToTranslate.map(l => `${languages[l]} (${l})`).join(', 
 
     generateBtn.addEventListener('click', handleGeneration);
     populateLanguages();
+    loadAudioModels();
 });

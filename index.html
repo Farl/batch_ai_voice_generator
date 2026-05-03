@@ -18,22 +18,19 @@
             <div class="input-container">
                 <textarea id="text-input" placeholder="Enter text to speak..."></textarea>
                 
-                <div class="voice-selector">
-                    <label for="voice-select">Voice Model:</label>
-                    <select id="voice-select">
-                        <optgroup label="Female">
-                            <option value="nova" selected>nova — warm &amp; natural</option>
-                            <option value="shimmer">shimmer — soft &amp; clear</option>
-                        </optgroup>
-                        <optgroup label="Male">
-                            <option value="onyx">onyx — deep &amp; authoritative</option>
-                            <option value="echo">echo — smooth &amp; balanced</option>
-                            <option value="fable">fable — expressive &amp; storytelling</option>
-                        </optgroup>
-                        <optgroup label="Neutral">
-                            <option value="alloy">alloy — versatile &amp; neutral</option>
-                        </optgroup>
-                    </select>
+                <div class="model-voice-row">
+                    <div class="model-selector">
+                        <label for="audio-model-select">Audio Model:</label>
+                        <select id="audio-model-select" disabled>
+                            <option value="">Loading models…</option>
+                        </select>
+                    </div>
+                    <div class="voice-selector" id="voice-selector-wrapper">
+                        <label for="voice-select">Voice:</label>
+                        <select id="voice-select">
+                            <!-- Populated dynamically based on selected model -->
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="language-selection">

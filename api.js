@@ -128,6 +128,64 @@ async function requestPollinationsText(messages, config) {
     return parseModelJson(extractContent(result));
 }
 
+// ─── Audio model metadata ─────────────────────────────────────────────────────
+
+// Models whose "text" input describes music/sound, not speech — voice param N/A.
+const MUSIC_MODEL_IDS = new Set(['acestep', 'elevenmusic']);
+
+// Standard OpenAI TTS voices accepted by Pollinations audio endpoint.
+// No voices endpoint exists on Pollinations; this is the canonical OpenAI list.
+// prettier-ignore
+const OPENAI_TTS_VOICES = [
+    { id: 'nova',    label: 'nova — warm & natural (F)'       },
+    { id: 'shimmer', label: 'shimmer — soft & clear (F)'      },
+    { id: 'onyx',    label: 'onyx — deep & authoritative (M)' },
+    { id: 'echo',    label: 'echo — smooth & balanced (M)'    },
+    { id: 'fable',   label: 'fable — expressive & narrative (M)' },
+    { id: 'alloy',   label: 'alloy — versatile & neutral'     },
+];
+
+/**
+ * Fetch available TTS/audio models from Pollinations /v1/models.
+ * Filters for models that: accept text input, produce audio output,
+ * and support the /audio/{text} GET endpoint.
+ * The models endpoint does not require authentication.
+ *
+ * @returns {Promise<Array<{id: string, type: 'speech'|'music'}>>}
+ */
+export async function fetchAudioModels() {
+    const config = getConfig();
+    const baseUrl = normalizeBaseUrl(config.POLLINATIONS_API_BASE_URL);
+    const res = await fetch(`${baseUrl}/v1/models`, {
+        signal: AbortSignal.timeout(15_000)
+    });
+    if (!res.ok) throw new Error(`Models endpoint error: ${res.status}`);
+    const data = await res.json();
+    return data.data
+        .filter(m =>
+            m.input_modalities?.includes('text') &&
+            m.output_modalities?.includes('audio') &&
+            m.supported_endpoints?.includes('/audio/{text}')
+        )
+        .map(m => ({
+            id: m.id,
+            type: MUSIC_MODEL_IDS.has(m.id) ? 'music' : 'speech',
+        }));
+}
+
+/**
+ * Return voice options for a given model.
+ * Music generation models (acestep, elevenmusic) don't use a voice parameter.
+ * All speech models on Pollinations accept the standard OpenAI TTS voice set.
+ *
+ * @param {string} modelId
+ * @returns {Array<{id: string, label: string}>} Empty array means voice N/A.
+ */
+export function getVoicesForModel(modelId) {
+    if (MUSIC_MODEL_IDS.has(modelId)) return [];
+    return OPENAI_TTS_VOICES;
+}
+
 // ─── Public: Text generation with fallback ────────────────────────────────────
 
 /**
@@ -156,26 +214,25 @@ export async function generateText(messages) {
 // ─── Public: Text-to-Speech URL ──────────────────────────────────────────────
 
 /**
- * Build a Pollinations TTS audio URL for the given text and voice.
- * The returned URL points to an MP3 audio file and can be used directly
- * as an <audio> src — no additional fetch is required.
+ * Build a Pollinations /audio/{text} URL.
+ * Returns an MP3 URL usable directly as an <audio> src.
  *
- * Supported voices: alloy, echo, fable, onyx, nova, shimmer
- * (alloy/echo/fable/onyx = male-leaning, nova/shimmer = female)
- *
- * @param {string} text  - The text to synthesize.
- * @param {string} voice - TTS voice name (default: 'nova').
+ * @param {string} text    - The text (or music prompt) to synthesize.
+ * @param {string} voice   - TTS voice name (ignored for music models).
+ * @param {string} modelId - Pollinations audio model id (e.g. 'qwen-tts').
  * @returns {string} Audio URL.
  */
-export function buildSpeechUrl(text, voice = 'nova') {
+export function buildSpeechUrl(text, voice, modelId) {
     const config = getConfig();
     const baseUrl = normalizeBaseUrl(config.POLLINATIONS_API_BASE_URL);
     const url = new URL(`${baseUrl}/audio/${encodeURIComponent(text)}`);
-    url.searchParams.set('voice', voice);
-    url.searchParams.set('model', 'openai-audio');
+    url.searchParams.set('model', modelId);
+    if (!MUSIC_MODEL_IDS.has(modelId) && voice) {
+        url.searchParams.set('voice', voice);
+    }
     if (config.POLLINATIONS_API_KEY) {
         url.searchParams.set('key', config.POLLINATIONS_API_KEY);
     }
-    console.log('[api] Building TTS URL for voice:', voice);
+    console.log('[api] TTS URL:', url.toString());
     return url.toString();
 }

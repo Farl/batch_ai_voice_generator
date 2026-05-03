@@ -59,14 +59,25 @@ textarea {
     box-sizing: border-box;
 }
 
-.voice-selector {
+.model-voice-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.model-selector {
+    flex: 2;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.voice-selector select {
-    width: 100%;
+.voice-selector {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .language-selection {
